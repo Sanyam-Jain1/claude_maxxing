@@ -1,0 +1,492 @@
+<title>Cube Geodesic Constants</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: one reading column (journal note), with full-width instrument panels for the tables and the checker. */
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --ink: #141b27;
+  --ink-2: #4b5669;
+  --rule: #d3dae6;
+  --accent: #1c58b5;
+  --accent-soft: #e3ecfa;
+  --s1: #2a78d6;
+  --s2: #eb6834;
+  --heat-lo: #eef3fb;
+  --heat-hi: #0f3d8a;
+  --ok: #17734a;
+  --warn: #9a5b00;
+  --open: #a23434;
+  --font-text: "STIX Two Text", "Cambria", "Times New Roman", serif;
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131b; --surface: #161d29; --ink: #e7ecf4; --ink-2: #a2adc0; --rule: #2b3547;
+    --accent: #84b2ff; --accent-soft: #1a2942; --s1: #3987e5; --s2: #d95926;
+    --heat-lo: #18202d; --heat-hi: #9cc4ff; --ok: #5cc493; --warn: #e0a84a; --open: #ef8a8a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131b; --surface: #161d29; --ink: #e7ecf4; --ink-2: #a2adc0; --rule: #2b3547;
+  --accent: #84b2ff; --accent-soft: #1a2942; --s1: #3987e5; --s2: #d95926;
+  --heat-lo: #18202d; --heat-hi: #9cc4ff; --ok: #5cc493; --warn: #e0a84a; --open: #ef8a8a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-text); font-size: 18px; line-height: 1.58;
+  padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 46rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.15rem; }
+main > * { margin: 0; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-ui); font-weight: 600; text-wrap: balance; line-height: 1.2; letter-spacing: -0.01em; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.35rem; margin-top: 1.9rem; padding-top: 1.1rem; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.05rem; margin-top: 0.7rem; }
+p, li { max-width: 68ch; }
+ul, ol { padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.4rem; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible, canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.kicker { font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); }
+.lede { font-size: 1.12rem; color: var(--ink); }
+.note { font-family: var(--font-ui); font-size: 0.86rem; color: var(--ink-2); line-height: 1.45; }
+var, .v { font-style: italic; font-family: var(--font-text); }
+.num { font-family: var(--font-mono); font-size: 0.9em; font-variant-numeric: tabular-nums; }
+.eq {
+  font-size: 1.04rem; padding: 0.7rem 1rem; border-left: 2px solid var(--accent);
+  background: var(--accent-soft); overflow-x: auto; white-space: nowrap; max-width: 100%;
+}
+.eq.wrap { white-space: normal; }
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr)); gap: 0; border: 1px solid var(--rule); background: var(--surface); }
+.results > div { padding: 1rem 1.1rem; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; margin: 0 -1px -1px 0; }
+.results .lab { font-family: var(--font-ui); font-size: 0.8rem; color: var(--ink-2); line-height: 1.35; }
+.results .val { font-family: var(--font-mono); font-size: 1.12rem; font-weight: 500; overflow-wrap: anywhere; }
+.results .sub { font-family: var(--font-ui); font-size: 0.78rem; color: var(--ink-2); }
+.tag { display: inline-block; font-family: var(--font-ui); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.08rem 0.45rem; border: 1px solid currentColor; border-radius: 2px; white-space: nowrap; }
+.tag.proved { color: var(--ok); } .tag.computed { color: var(--accent); } .tag.known { color: var(--ink-2); } .tag.open { color: var(--open); } .tag.heur { color: var(--warn); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-family: var(--font-ui); font-size: 0.86rem; line-height: 1.4; }
+th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-2); font-size: 0.76rem; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+pre { margin: 0; font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.5; background: var(--surface); border: 1px solid var(--rule); padding: 0.9rem 1rem; overflow-x: auto; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+figcaption { font-family: var(--font-ui); font-size: 0.84rem; color: var(--ink-2); line-height: 1.45; max-width: 68ch; }
+.diagram { display: flex; flex-direction: row; flex-wrap: wrap; gap: 1.2rem; align-items: center; }
+.diagram svg { width: 100%; max-width: 300px; height: auto; flex: 0 0 auto; }
+.diagram > div { flex: 1 1 15rem; min-width: 0; }
+svg text { font-family: var(--font-ui); }
+.lab-panel { border: 1px solid var(--rule); background: var(--surface); padding: 1.1rem; display: flex; flex-direction: column; gap: 1rem; }
+.maps { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.2rem; }
+.map { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; position: relative; }
+.map h3 { margin: 0; font-size: 0.92rem; }
+.map canvas { width: 100%; max-width: 100%; aspect-ratio: 1; border: 1px solid var(--rule); touch-action: none; display: block; cursor: crosshair; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; align-items: center; font-family: var(--font-ui); font-size: 0.8rem; color: var(--ink-2); }
+.sw { display: inline-block; width: 0.8rem; height: 0.8rem; margin-right: 0.35rem; vertical-align: -0.08rem; }
+.ramp { display: inline-block; width: 7rem; height: 0.7rem; background: linear-gradient(90deg, var(--heat-lo), var(--heat-hi)); border: 1px solid var(--rule); vertical-align: -0.05rem; margin: 0 0.4rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; align-items: center; font-family: var(--font-ui); font-size: 0.86rem; }
+.controls label { display: flex; align-items: center; gap: 0.5rem; }
+.controls input[type=range] { width: 9rem; accent-color: var(--accent); }
+.readout { font-family: var(--font-mono); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+button { font-family: var(--font-ui); font-size: 0.86rem; font-weight: 500; padding: 0.42rem 0.9rem; border: 1px solid var(--accent); background: var(--accent); color: var(--surface); border-radius: 3px; cursor: pointer; }
+button.ghost { background: transparent; color: var(--accent); }
+.tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-family: var(--font-ui); font-size: 0.76rem; line-height: 1.35; padding: 0.3rem 0.5rem; border-radius: 3px; white-space: nowrap; z-index: 2; transform: translate(-50%, -130%); }
+.ledger td:first-child { white-space: nowrap; }
+@media (max-width: 520px) { body { font-size: 17px; } h1 { font-size: 1.7rem; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<main>
+<p class="kicker">Research note · geometric probability on polyhedral surfaces</p>
+<h1>How often is the shortest path across a cube not the obvious one?</h1>
+<p class="lede">Pick two points at random on the surface of a cube and join them by the shortest path that stays on the surface. This note gives an exact answer when the points lie on adjacent faces, and an exact description plus a 30-digit value when they lie on opposite faces. The opposite-face case was estimated on a grid in a 2020 paper, which remarked that exact computation seemed very difficult.</p>
+
+<div class="results">
+  <div><span class="lab">Adjacent faces: probability the shortest path avoids the shared edge</span><span class="val">ln 2 − 1/2</span><span class="sub">= 0.193147… <span class="tag proved">proved here</span></span></div>
+  <div><span class="lab">Opposite faces: probability the shortest path crosses four faces</span><span class="val">0.15588081552…</span><span class="sub">no closed form found <span class="tag computed">computed here</span></span></div>
+  <div><span class="lab">Whole surface: probability the path uses more faces than necessary</span><span class="val">0.1547449230</span><span class="sub">about 1 pair in 6.5 <span class="tag computed">computed here</span></span></div>
+  <div><span class="lab">Mean shortest-path distance on a unit cube</span><span class="val">1.0629753062</span><span class="sub">straight-line value is 0.8589 <span class="tag computed">computed here</span></span></div>
+</div>
+
+<p class="note">Status labels used throughout: <span class="tag known">established</span> published before this note · <span class="tag proved">proved here</span> derived with a complete argument · <span class="tag computed">computed here</span> numerical, with independent checks · <span class="tag heur">heuristic</span> supported but not proved · <span class="tag open">open</span> unresolved.</p>
+
+<h2>The question</h2>
+<p>Let <var>S</var> and <var>T</var> be independent, uniformly distributed points on the surface of a unit cube, and let <var>d</var>(<var>S</var>, <var>T</var>) be the length of the shortest path between them that stays on the surface. Three precise questions:</p>
+<ol>
+  <li>If <var>S</var> and <var>T</var> are on adjacent faces, what is the probability that the shortest path does not cross their common edge and instead passes through a third face?</li>
+  <li>If they are on opposite faces, what is the probability that the shortest path passes through two of the side faces (four faces in total) instead of one?</li>
+  <li>What is the mean of <var>d</var>(<var>S</var>, <var>T</var>)?</li>
+</ol>
+
+<h2>How this question was chosen</h2>
+<p>I looked for a question where a specific published statement marks the edge of what is known, and where a claim could be tested by calculation today. Candidates that were examined and set aside:</p>
+<ul>
+  <li><b>Sandpile groups of chess-piece graphs.</b> The rook's graph is solved (Ducey, Gerhard and Watson). I found no treatment of the king's or bishop's graph, but these graphs have little symmetry and I had no reason to expect a clean structure, so a search there risked ending in a table of numbers with no claim.</li>
+  <li><b>Exact mean geodesic distance on a polyhedron.</b> Searches turned up exact results for straight-line distances inside and between faces of a cube, but none for distance measured along the surface. This led to the next item.</li>
+  <li><b>Shortest paths between opposite faces of a cube.</b> Goldstone, Roca and Suzzi Valli (2020) show that such a path crosses three or four faces, estimate the four-face probability on a grid for each source point, and write that "exact computations seem very difficult." They also list features of their probability plot "whose explanation remains to be uncovered." That is a documented gap with a checkable answer, so I pursued it.</li>
+</ul>
+
+<h2>What was already known</h2>
+<div class="tablewrap"><table>
+<tr><th>Source</th><th>What it establishes</th><th>What it leaves open</th></tr>
+<tr><td><a href="https://arxiv.org/abs/2003.06096">Goldstone, Roca, Suzzi Valli, <i>Shortest Paths on Cubes</i> (arXiv 2003.06096)</a></td><td>Opposite faces: the shortest path is one of 12 unfoldings and crosses 3 or 4 faces. Four-face target regions are polygons anchored at corners, at most one per corner. A shortest path is always a straight segment inside some unfolding.</td><td>Exact probabilities. The corner "singularities" and other features of the probability plot. The adjacent-face case is not treated.</td></tr>
+<tr><td><a href="https://arxiv.org/abs/2201.04253">Fontenot et al., <i>Landscapes of the Tetrahedron and Cube</i> (arXiv 2201.04253)</a></td><td>Distance formulas between arbitrary surface points of a cube and tetrahedron, by regions of nets. I read only the abstract.</td><td>No probabilities or averages are mentioned in the abstract.</td></tr>
+<tr><td><a href="https://en.wikipedia.org/wiki/Mean_line_segment_length">Mean line segment length (Wikipedia)</a>; <a href="https://people.sc.fsu.edu/~jburkardt/m_src/cube_surface_distance_test/cube_surface_distance_test.txt">Burkardt's cube surface test</a></td><td>Straight-line mean distance between two surface points of a unit cube, about 0.858893, with exact same-face and different-face parts.</td><td>The along-the-surface (geodesic) mean.</td></tr>
+<tr><td><a href="https://arxiv.org/abs/2309.13177">Beck, <i>Mean distance in polyhedra</i> (arXiv 2309.13177)</a></td><td>Exact straight-line mean distance inside each Platonic solid.</td><td>Surface distance.</td></tr>
+</table></div>
+<p>I did not find the constant ln 2 − 1/2 or the four-face probability stated anywhere. The limits of that search are listed under <a href="#unverified">what remains unverified</a>.</p>
+
+<h2>Setup</h2>
+<p>Unfold the faces a path crosses into the plane. The path is shortest when it becomes a straight segment, so <var>d</var>(<var>S</var>, <var>T</var>) is the minimum, over sequences of faces, of the straight-line distance between <var>S</var> and the unfolded image of <var>T</var>. Two facts make everything below work:</p>
+<ul>
+  <li><span class="tag proved">proved here</span> The difference of two such squared distances has no <var>S</var>² or <var>T</var>² terms, because unfoldings are rigid motions. It is affine in <var>S</var> for fixed <var>T</var> and affine in <var>T</var> for fixed <var>S</var>. So an inequality between two unfoldings that holds at all 16 pairs of face corners holds everywhere.</li>
+  <li><span class="tag proved">proved here</span> Using that fact, an exact integer check over all face sequences that visit each face at most once shows that only 3 unfoldings can ever win for adjacent faces (out of 26) and only 12 for opposite faces (out of 28). Every other sequence is beaten everywhere by a single one of these.</li>
+</ul>
+<p class="note">One step is taken from the literature: the smallest unfolded distance is always realised by a genuine path (Goldstone et al., Appendix A). I also checked it numerically on 8,000 random pairs with a brute-force search that tests whether each segment stays inside its unfolding.</p>
+
+<h2>Adjacent faces: the 3π/4 rule and ln 2 − 1/2</h2>
+<figure class="diagram">
+<svg viewBox="0 0 250 250" role="img" aria-label="Unfolding diagram: the bottom face, the side face unfolded across the shared edge, and the same side face reached through the third face, which is a quarter turn about the vertex V.">
+  <rect x="25" y="25" width="100" height="100" fill="var(--surface)" stroke="var(--rule)" stroke-width="1.5"/>
+  <rect x="125" y="25" width="100" height="100" fill="var(--accent-soft)" stroke="var(--rule)" stroke-width="1.5"/>
+  <rect x="25" y="125" width="100" height="100" fill="var(--surface)" stroke="var(--rule)" stroke-width="1.5"/>
+  <rect x="125" y="125" width="100" height="100" fill="var(--accent-soft)" stroke="var(--rule)" stroke-width="1.5"/>
+  <line x1="125" y1="125" x2="125" y2="225" stroke="var(--ink)" stroke-width="2.5"/>
+  <text x="33" y="216" font-size="10" fill="var(--ink-2)">bottom face</text>
+  <text x="33" y="40" font-size="10" fill="var(--ink-2)">third face</text>
+  <text x="133" y="216" font-size="10" fill="var(--ink-2)">side face, direct</text>
+  <text x="133" y="40" font-size="10" fill="var(--ink-2)">side face, via third</text>
+  <text x="129" y="182" font-size="10" fill="var(--ink)">E</text>
+  <path d="M 195 135 A 70.7 70.7 0 0 0 135 55" fill="none" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="2 3"/>
+  <line x1="50" y1="145" x2="195" y2="135" stroke="var(--s1)" stroke-width="2" stroke-dasharray="5 4"/>
+  <line x1="50" y1="145" x2="135" y2="55" stroke="var(--s2)" stroke-width="2"/>
+  <circle cx="125" cy="125" r="4" fill="var(--ink)"/><text x="109" y="119" font-size="11" font-weight="600" fill="var(--ink)">V</text>
+  <circle cx="50" cy="145" r="4.5" fill="var(--ink)" stroke="var(--surface)" stroke-width="2"/><text x="38" y="163" font-size="11" font-weight="600" fill="var(--ink)">S</text>
+  <circle cx="195" cy="135" r="4.5" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/><text x="201" y="149" font-size="11" font-weight="600" fill="var(--ink)">T</text>
+  <circle cx="135" cy="55" r="4.5" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/><text x="142" y="52" font-size="11" font-weight="600" fill="var(--ink)">T′</text>
+</svg>
+<div>
+<figcaption>The side face can be laid flat in two ways: across the shared edge E (image T), or by going through the third face (image T′). The two images differ by a quarter turn about the vertex V. Here the route through the third face (solid) is shorter than the route across E (dashed).</figcaption>
+</div>
+</figure>
+<p>Let <var>p</var>, <var>q</var> be the distances from <var>S</var> to the shared edge and to the third face, and <var>r</var>, <var>w</var> the same for <var>T</var>. Then</p>
+<div class="eq"><var>d</var><sub>direct</sub>² = (<var>p</var> + <var>r</var>)² + (<var>q</var> − <var>w</var>)², &nbsp;&nbsp; <var>d</var><sub>third</sub>² = (<var>p</var> + <var>w</var>)² + (<var>q</var> + <var>r</var>)²</div>
+<p>and the difference factors: <var>d</var><sub>direct</sub>² − <var>d</var><sub>third</sub>² = 2[<var>r</var>(<var>p</var> − <var>q</var>) − <var>w</var>(<var>p</var> + <var>q</var>)]. So the route through the third face is shorter exactly when</p>
+<div class="eq"><var>w</var> / <var>r</var> &lt; (<var>p</var> − <var>q</var>) / (<var>p</var> + <var>q</var>)</div>
+<p>Geometrically: the surface angle at a cube vertex is 3π/2, and the shortest path passes V on the side where the angle between VS and VT is less than 3π/4. The condition depends only on the two ratios <var>σ</var> = <var>q</var>/<var>p</var> and <var>τ</var> = <var>w</var>/<var>r</var>. For a uniform point in a unit square, each ratio has density 1/2 on [0, 1]. Therefore, for one end of the edge,</p>
+<div class="eq">P = ∫<sub>0</sub><sup>1</sup> ½ · ½ · (1 − <var>σ</var>)/(1 + <var>σ</var>) d<var>σ</var> = (2 ln 2 − 1)/4</div>
+<p>The two ends of the shared edge give disjoint events (shown by a short inequality: both conditions at once would need the two bounds on <var>T</var> to sum to more than 1, and they never do). Doubling gives the result.</p>
+<div class="eq wrap"><b>Result 1.</b> <span class="tag proved">proved here</span> For independent uniform points on two adjacent faces of a cube, the shortest surface path avoids the common edge with probability ln 2 − 1/2 = 0.19314718…</div>
+
+<h2>Opposite faces: six inequalities</h2>
+<p>Fix a vertical edge of the cube and call the two side faces that meet there A and B. Let <var>x</var>, <var>y</var> be the distances from <var>S</var> (on the bottom) to faces A and B, and let <var>v</var>, <var>u</var> be the distances from <var>T</var> (on the top) to faces A and B. The path bottom → A → B → top has squared length (1 + <var>x</var> + <var>u</var>)² + (<var>y</var> + <var>v</var>)². It is the shortest of all twelve candidates exactly when</p>
+<div class="tablewrap"><table>
+<tr><th></th><th>Inequality</th><th>It beats the path through</th></tr>
+<tr><td>(i)</td><td class="n">u(1 + x + y) &lt; v(1 + x − y)</td><td>A only</td></tr>
+<tr><td>(ii)</td><td class="n">x(1 + u + v) &lt; y(1 + u − v)</td><td>B only</td></tr>
+<tr><td>(iii)</td><td class="n">x(1 + u) &lt; (1 − v)(1 + y)</td><td>B, then the face opposite A</td></tr>
+<tr><td>(iv)</td><td class="n">u(1 + x) &lt; (1 − y)(1 + v)</td><td>the face opposite B, then A</td></tr>
+<tr><td>(v)</td><td class="n">4x + u(1 + x + y) + v(3 − x + y) &lt; 4</td><td>the face opposite A only</td></tr>
+<tr><td>(vi)</td><td class="n">4u + x(1 + u + v) + y(3 − u + v) &lt; 4</td><td>the face opposite B only</td></tr>
+</table></div>
+<p>By symmetry there are eight such regions of equal volume, so the four-face probability is 8 times the volume of this one region in the unit 4-cube.</p>
+<p><span class="tag computed">computed here</span> Sufficiency of these six was checked two ways. On a 150 × 150 grid of rational source points, exact arithmetic confirmed at every vertex of every polygon cut out by (i)–(vi) that none of the other eleven unfoldings is shorter; because the comparison is affine in <var>T</var>, the vertex check covers each whole polygon. Separately, Monte Carlo sampling against the brute-force minimum gave matching results. This is not a symbolic proof for every source point.</p>
+
+<h3>Two wrong turns on the way</h3>
+<p>Inequalities (i) and (ii) alone looked sufficient at first. They are the two "corner moves" and reduce to ratio conditions like the adjacent-face rule. That region integrates to 0.15980, but brute-force sampling gave 0.15588. Adding (iii) and (iv) still left a discrepancy of about 10<sup>−4</sup>, traced to (v) and (vi). The two-inequality value survives as a rigorous upper bound:</p>
+<div class="eq"><var>P</var><sub>4</sub> &lt; 2(2<var>I</var><sub>A</sub> + <var>I</var><sub>B</sub>) = 0.1598041421674…, &nbsp;&nbsp; <var>I</var><sub>A</sub> = ½ − 2 ln 2 + π√3/6</div>
+<p class="note"><var>I</var><sub>B</sub> = 0.0386914290892751795… is a one-dimensional integral of logarithms over (1 + <var>s</var>²)³; I did not find a closed form for it.</p>
+
+<h3>The value</h3>
+<p>For a fixed source point the target region is a convex polygon whose area is a rational function of (<var>x</var>, <var>y</var>). There are seven polygon types. Integrating the exact area formulas over the regions where each type applies, with region boundaries located by root-finding, gives</p>
+<div class="eq wrap"><b>Result 2.</b> <span class="tag computed">computed here</span> <var>P</var><sub>4</sub> = <span class="num" id="p4digits">0.155880815524256750509896159877</span>…</div>
+<p>The polygon type changes across curves in the (<var>x</var>, <var>y</var>) plane. One is the circle <var>x</var>² + (<var>y</var> + 1)² = 2. Three are cubics, for example</p>
+<div class="eq"><var>x</var>³ − <var>x</var>²<var>y</var> + <var>x</var><var>y</var>² − <var>y</var>³ − 2<var>x</var>² − 2<var>x</var><var>y</var> − 3<var>x</var> + <var>y</var> = 0</div>
+<p><span class="tag heur">heuristic</span> A computer-algebra check found no singular points on any of these cubics, in the affine plane or at infinity, so each has genus 1. Integrating rational functions over a region bounded by a genus-1 curve usually produces elliptic integrals. This is a reason to doubt that <var>P</var><sub>4</sub> has an expression in logarithms, arctangents and dilogarithms. It is not a proof: a different order of integration could avoid these curves.</p>
+<p><span class="tag open">open</span> Integer-relation searches (PSLQ at 40 digits, coefficients up to 2000) against four sets of constants built from π, √2, √3, √7, logarithms of 2, 3 and 7, Catalan's constant and several dilogarithm values returned only relations at the size expected by chance.</p>
+
+<h3>The source-point map, and the corner behaviour</h3>
+<p>Goldstone et al. plot, for each source point, the fraction of target points reached by a four-face path, and describe "apparent singularities at the corners" as unexplained. The exact polygons explain them. As <var>S</var> approaches a corner along a ray making angle <var>θ</var> with the nearer edge, the fraction tends to a limit that depends on the direction:</p>
+<div class="eq wrap"><span class="tag proved">proved here</span> with <var>κ</var> = tan(π/4 − <var>θ</var>): &nbsp; limit = <var>κ</var>² / (2(1 − <var>κ</var>)) for <var>κ</var> ≤ ½, and (1 − <var>κ</var>) − (1 − <var>κ</var>)³/(2<var>κ</var>²) + (2<var>κ</var> − 1)²/(2<var>κ</var>²) for <var>κ</var> ≥ ½.</div>
+<p>The limit runs from 0 along the diagonal to 1/2 along the edge. The function is bounded but has no single value at the corner, which is what a contour plot draws as a pinch. The low values along the diagonals have the same origin: on the diagonal through a corner, that corner's region has zero area.</p>
+<div class="tablewrap"><table>
+<tr><th>Point in their Fig. 14 (face = [−1, 1]²)</th><th>Their contour label</th><th>Exact value here</th></tr>
+<tr><td class="n">(−0.36, 1.00)</td><td class="n">35.3%</td><td class="n">35.28%</td></tr>
+<tr><td class="n">(−0.58, 1.00)</td><td class="n">39.2%</td><td class="n">38.51%</td></tr>
+<tr><td class="n">(−0.80, 1.00)</td><td class="n">43.1%</td><td class="n">43.54%</td></tr>
+<tr><td class="n">(−0.05, 0.30)</td><td class="n">1.96%</td><td class="n">2.30%</td></tr>
+<tr><td class="n">(−0.50, 0.60)</td><td class="n">7.86%</td><td class="n">8.32%</td></tr>
+</table></div>
+<p class="note">Positions were read off the published figure by eye, so agreement to within a few tenths of a percentage point is the most this comparison can show. Their values come from a 0.01-spaced grid.</p>
+
+<h2>Check it yourself</h2>
+<div class="lab-panel">
+  <div class="maps">
+    <div class="map" id="srcmap">
+      <h3>Source point on the bottom face</h3>
+      <canvas id="heat" width="384" height="384" tabindex="0" aria-label="Heat map of the four-face probability for each source point. Click or drag to move the source point."></canvas>
+      <div class="legend"><span>four-face share of targets: 0%<span class="ramp"></span>50%</span></div>
+    </div>
+    <div class="map" id="tgtmap">
+      <h3>Target points on the top face</h3>
+      <canvas id="tgt" width="384" height="384" aria-label="Map of the top face showing which target points are reached by a three-face or a four-face shortest path from the chosen source."></canvas>
+      <div class="legend"><span><span class="sw" style="background:var(--s1)"></span>three-face path shortest</span><span><span class="sw" style="background:var(--s2)"></span>four-face path shortest</span></div>
+    </div>
+  </div>
+  <div class="controls">
+    <label for="sa">a <input type="range" id="sa" min="0.005" max="0.995" step="0.005" value="0.86"></label>
+    <label for="sb">b <input type="range" id="sb" min="0.005" max="0.995" step="0.005" value="0.955"></label>
+    <span class="readout" id="readout"></span>
+  </div>
+  <p class="note">Left: each cell is coloured by the exact area of the four-face region for that source point, computed in your browser by clipping the twelve nearest-image cells. Right: every pixel is coloured by brute-force minimum over the twelve unfoldings. The two computations are independent; the percentage in the readout comes from the first and should match the orange share of the second.</p>
+
+  <h3>Live Monte Carlo test</h3>
+  <div class="controls">
+    <button id="mcgo" type="button">Start sampling</button>
+    <button id="mcreset" type="button" class="ghost">Reset</button>
+    <span class="readout" id="mcn">0 samples</span>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>Quantity</th><th>Claimed</th><th>Sampled</th><th>± 1 s.e.</th><th>Gap in s.e.</th></tr>
+    <tr><td>Adjacent faces, path avoids shared edge</td><td class="n">0.1931472</td><td class="n" id="mc_a">–</td><td class="n" id="mc_ae">–</td><td class="n" id="mc_az">–</td></tr>
+    <tr><td>Opposite faces, four-face path</td><td class="n">0.1558808</td><td class="n" id="mc_o">–</td><td class="n" id="mc_oe">–</td><td class="n" id="mc_oz">–</td></tr>
+    <tr><td>Mean distance, adjacent faces</td><td class="n">1.0658531</td><td class="n" id="mc_da">–</td><td class="n" id="mc_dae">–</td><td class="n" id="mc_daz">–</td></tr>
+    <tr><td>Mean distance, opposite faces</td><td class="n">1.5930341</td><td class="n" id="mc_do">–</td><td class="n" id="mc_doe">–</td><td class="n" id="mc_doz">–</td></tr>
+  </table></div>
+  <p class="note">Each sample draws four uniform numbers and takes the minimum over all candidate unfoldings; none of the derived inequalities is used. A gap beyond about 3 standard errors that persists as the sample grows would falsify the claim on that row.</p>
+</div>
+
+<h2>Mean distances and the face-count distribution</h2>
+<div class="tablewrap"><table>
+<tr><th>Face pair</th><th>Weight</th><th>Mean shortest-path distance</th><th>Status</th></tr>
+<tr><td>Same face</td><td class="n">1/6</td><td class="n">(2 + √2 + 5 ln(1 + √2))/15 = 0.5214054332</td><td><span class="tag known">established</span></td></tr>
+<tr><td>Adjacent faces</td><td class="n">2/3</td><td class="n">1.065853075348094653616848853</td><td><span class="tag computed">computed here</span></td></tr>
+<tr><td>Opposite faces</td><td class="n">1/6</td><td class="n">1.5930341029 (last digit uncertain)</td><td><span class="tag computed">computed here</span></td></tr>
+<tr><td><b>Whole surface</b></td><td class="n">1</td><td class="n"><b>1.0629753062</b></td><td><span class="tag computed">computed here</span></td></tr>
+</table></div>
+<p>The adjacent-face mean is the flat two-square mean 1.0881382499 (a known closed form) minus twice a correction 0.0111425873 for pairs that go around a vertex. The correction reduces to a smooth two-dimensional integral of closed-form functions and was evaluated at 28 and 40 digits with matching results. I did not find a closed form for it.</p>
+<div class="tablewrap"><table>
+<tr><th>Faces the shortest path touches</th><th>Probability</th><th>Value</th></tr>
+<tr><td class="n">1</td><td class="n">1/6</td><td class="n">0.1666667</td></tr>
+<tr><td class="n">2</td><td class="n">1 − (2/3) ln 2</td><td class="n">0.5379019</td></tr>
+<tr><td class="n">3</td><td class="n">(2/3)(ln 2 − 1/2) + (1 − P₄)/6</td><td class="n">0.2694513</td></tr>
+<tr><td class="n">4</td><td class="n">P₄/6</td><td class="n">0.0259801</td></tr>
+</table></div>
+<p>The expected number of faces is 2.1547449. It exceeds 2, the value if every path took the minimal number of faces, by exactly the probability of a non-minimal route.</p>
+
+<h2>Evidence for and against</h2>
+<div class="tablewrap"><table>
+<tr><th>Quantity</th><th>Main method</th><th>Independent clipping method</th><th>Monte Carlo, 4 × 10¹⁰ samples</th></tr>
+<tr><td>Adjacent, avoids edge</td><td class="n">0.1931471806 (exact)</td><td class="n">0.1931452580 (coarse grid, error shrinking as h²)</td><td class="n">0.19315076 ± 0.00000197</td></tr>
+<tr><td>Opposite, four faces</td><td class="n">0.1558808155243</td><td class="n">0.1558808151 (extrapolated)</td><td class="n">0.15587960 ± 0.00000181</td></tr>
+<tr><td>Mean, adjacent</td><td class="n">1.0658530753481</td><td class="n">1.0658530753638</td><td class="n">1.06585384 ± 0.00000185</td></tr>
+<tr><td>Mean, opposite</td><td class="n">n/a</td><td class="n">1.5930341029</td><td class="n">1.59303403 ± 0.00000114</td></tr>
+</table></div>
+<p><b>For.</b> Three methods that share no code beyond the twelve distance formulas agree. The formulas themselves were checked against a brute-force enumeration of unfoldings. The exact per-source areas reproduce the published contour values on the face edge.</p>
+<p><b>Against, or weaker than it looks.</b></p>
+<ul>
+  <li>The Monte Carlo estimate for the adjacent case sits 1.8 standard errors above ln 2 − 1/2. That is within ordinary sampling variation, and the derivation is short enough to check by hand, but it is the weakest agreement in the table.</li>
+  <li>Digits of <var>P</var><sub>4</sub> beyond the ninth are supported only by repeated runs of one method at different working precisions (20, 32 and 42 digits). The independent method confirms about nine digits.</li>
+  <li>The opposite-face mean distance has no high-precision derivation here, only the clipping method (convergent to about 10 digits) and Monte Carlo.</li>
+  <li>Result 1 is elementary. A result this short may exist as folklore or as an exercise that my searches did not reach.</li>
+</ul>
+
+<h2>What might be new</h2>
+<ul>
+  <li>The exact value ln 2 − 1/2 for adjacent faces.</li>
+  <li>The six-inequality description of the four-face region, including the finding that the two corner-move conditions alone overcount by 2.5%.</li>
+  <li>The numerical value of the four-face probability, and the upper bound 0.15980.</li>
+  <li>The direction-dependent corner limit, which accounts for the unexplained corner feature in the 2020 plot.</li>
+  <li>The mean surface distance 1.0629753 for the unit cube and its three components.</li>
+  <li>The observation that the natural region boundaries are smooth cubics.</li>
+</ul>
+
+<h2 id="unverified">What remains unverified</h2>
+<ul>
+  <li><b>Novelty.</b> The search covered arXiv listings, general web search and the two most relevant papers. I did not read the journal version of the 2020 paper, the full text of Fontenot et al., or search MathOverflow, Math Stack Exchange or the problem sections of journals systematically.</li>
+  <li><b>Sufficiency of the six inequalities</b> for every source point, as opposed to the 22,500 rational points tested exactly.</li>
+  <li><b>Whether <var>P</var><sub>4</sub> has a closed form.</b> The genus argument is suggestive only.</li>
+  <li><b>Closed forms</b> for <var>I</var><sub>B</sub> and for the adjacent-face mean distance.</li>
+  <li><b>The realisability lemma</b> is cited from Goldstone et al. and checked numerically, not re-proved.</li>
+</ul>
+
+<h2>The simplest test</h2>
+<p>Twelve lines of Python sample both probabilities without using any of the reasoning above. With 10⁷ samples the standard error is about 0.00012; to distinguish the claimed <var>P</var><sub>4</sub> from the two-inequality value 0.15980 takes about 10⁵ samples.</p>
+<pre>import numpy as np
+rng = np.random.default_rng(0); N = 10**7
+a, b, c, d = rng.random((4, N))
+# adjacent: S=(a,b) on the bottom, T on the face x=1 at position c, height d
+direct = (1+d-a)**2 + (c-b)**2
+around = np.minimum((2-c-a)**2 + (1+d-b)**2, (1+c-a)**2 + (d+b)**2)
+print((around &lt; direct).mean(), np.log(2) - 0.5)
+# opposite: S=(a,b) on the bottom, T=(c,d) on the top
+three = np.minimum.reduce([(b-d)**2+(3-a-c)**2, (b-d)**2+(1+a+c)**2,
+                           (a-c)**2+(3-b-d)**2, (a-c)**2+(1+b+d)**2])
+four = np.minimum.reduce([(3-d-a)**2+(2-c-b)**2, (3-c-b)**2+(2-d-a)**2,
+    (2-d+a)**2+(1+c-b)**2, (2+c-b)**2+(1-d+a)**2, (2+d-a)**2+(1-c+b)**2,
+    (2-c+b)**2+(1+d-a)**2, (1+d+a)**2+(c+b)**2, (1+c+b)**2+(d+a)**2])
+print((four &lt; three).mean(), 0.1558808155)</pre>
+<p>A sharper test of Result 1 needs no computer: verify the factorisation of <var>d</var><sub>direct</sub>² − <var>d</var><sub>third</sub>² and evaluate one integral.</p>
+
+<h2>Sources</h2>
+<ul class="note">
+  <li><a href="https://arxiv.org/abs/2003.06096">R. Goldstone, R. Roca, R. Suzzi Valli, <i>Shortest Paths on Cubes</i>, arXiv:2003.06096 (2020)</a>. Read in full (arXiv version).</li>
+  <li><a href="https://arxiv.org/abs/2201.04253">K. Fontenot et al., <i>Landscapes of the Tetrahedron and Cube: An Exploration of Shortest Paths on Polyhedra</i>, arXiv:2201.04253</a>. Abstract only.</li>
+  <li><a href="https://arxiv.org/abs/1507.06583">J. Ducey, J. Gerhard, N. Watson, <i>The Smith and Critical Groups of the Square Rook's Graph and its Complement</i>, arXiv:1507.06583</a>. Listing only.</li>
+  <li><a href="https://arxiv.org/abs/2309.13177">D. Beck, <i>Mean distance in polyhedra</i>, arXiv:2309.13177</a>. Search summary only.</li>
+  <li><a href="https://en.wikipedia.org/wiki/Mean_line_segment_length">Wikipedia, <i>Mean line segment length</i></a> and <a href="https://people.sc.fsu.edu/~jburkardt/m_src/cube_surface_distance_test/cube_surface_distance_test.txt">J. Burkardt, cube surface distance test</a>. Search summaries only.</li>
+</ul>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var SQ = [[0, 0], [1, 0], [1, 1], [0, 1]];
+  function sites(a, b) {
+    return [[3 - a, b], [-1 - a, b], [a, 3 - b], [a, -1 - b],
+      [2 - b, 3 - a], [3 - b, 2 - a], [b - 1, 2 + a], [b - 2, 1 + a],
+      [1 + b, a - 2], [2 + b, a - 1], [-b, -1 - a], [-1 - b, -a]];
+  }
+  function clip(poly, A, B, C) {
+    var out = [], n = poly.length;
+    for (var k = 0; k < n; k++) {
+      var p = poly[k], q = poly[(k + 1) % n];
+      var fp = A * p[0] + B * p[1] + C, fq = A * q[0] + B * q[1] + C;
+      if (fp <= 0) out.push(p);
+      if ((fp < 0 && fq > 0) || (fp > 0 && fq < 0)) { var t = fp / (fp - fq); out.push([p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])]); }
+    }
+    return out;
+  }
+  function fourArea(a, b) {
+    var s = sites(a, b), tot = 0;
+    for (var i = 4; i < 12; i++) {
+      var poly = SQ, p = s[i];
+      for (var j = 0; j < 12 && poly.length >= 3; j++) {
+        if (j === i) continue;
+        var q = s[j];
+        poly = clip(poly, 2 * (q[0] - p[0]), 2 * (q[1] - p[1]), p[0] * p[0] + p[1] * p[1] - q[0] * q[0] - q[1] * q[1]);
+      }
+      if (poly.length >= 3) { var A = 0; for (var k = 0; k < poly.length; k++) { var u = poly[k], w = poly[(k + 1) % poly.length]; A += u[0] * w[1] - u[1] * w[0]; } tot += A / 2; }
+    }
+    return tot;
+  }
+  function token(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function rgb(hex) { hex = hex.replace("#", ""); return [parseInt(hex.substr(0, 2), 16), parseInt(hex.substr(2, 2), 16), parseInt(hex.substr(4, 2), 16)]; }
+  var heat = document.getElementById("heat"), tgt = document.getElementById("tgt");
+  var sa = document.getElementById("sa"), sb = document.getElementById("sb"), readout = document.getElementById("readout");
+  var G = 96, grid = new Float32Array(G * G);
+  for (var j = 0; j < G; j++) for (var i = 0; i < G; i++) grid[j * G + i] = fourArea((i + 0.5) / G, (j + 0.5) / G);
+  var S = { a: 0.86, b: 0.955 };
+  function drawHeat() {
+    var ctx = heat.getContext("2d"), W = heat.width, c0 = rgb(token("--heat-lo")), c1 = rgb(token("--heat-hi"));
+    var cell = W / G;
+    for (var j = 0; j < G; j++) for (var i = 0; i < G; i++) {
+      var t = Math.min(1, grid[j * G + i] / 0.5);
+      ctx.fillStyle = "rgb(" + Math.round(c0[0] + t * (c1[0] - c0[0])) + "," + Math.round(c0[1] + t * (c1[1] - c0[1])) + "," + Math.round(c0[2] + t * (c1[2] - c0[2])) + ")";
+      ctx.fillRect(i * cell, W - (j + 1) * cell, cell + 0.5, cell + 0.5);
+    }
+    var x = S.a * W, y = W - S.b * W;
+    ctx.lineWidth = 5; ctx.strokeStyle = token("--surface"); ctx.beginPath(); ctx.arc(x, y, 9, 0, 6.2832); ctx.stroke();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = token("--s2"); ctx.beginPath(); ctx.arc(x, y, 9, 0, 6.2832); ctx.stroke();
+  }
+  function winner(s, c, d) {
+    var best = 1e9, bi = 0;
+    for (var i = 0; i < 12; i++) { var dx = c - s[i][0], dy = d - s[i][1], v = dx * dx + dy * dy; if (v < best) { best = v; bi = i; } }
+    return [bi, Math.sqrt(best)];
+  }
+  var orangeShare = 0;
+  function drawTgt() {
+    var ctx = tgt.getContext("2d"), W = tgt.width, R = 192, img = ctx.createImageData(R, R);
+    var c3 = rgb(token("--s1")), c4 = rgb(token("--s2")), gap = rgb(token("--surface")), s = sites(S.a, S.b);
+    var idx = new Int8Array(R * R), n4 = 0;
+    for (var j = 0; j < R; j++) for (var i = 0; i < R; i++) { var w = winner(s, (i + 0.5) / R, 1 - (j + 0.5) / R)[0]; idx[j * R + i] = w; if (w >= 4) n4++; }
+    orangeShare = n4 / (R * R);
+    for (j = 0; j < R; j++) for (i = 0; i < R; i++) {
+      var k = j * R + i, w0 = idx[k], edge = (i + 1 < R && idx[k + 1] !== w0) || (j + 1 < R && idx[k + R] !== w0);
+      var col = edge ? gap : (w0 >= 4 ? c4 : c3);
+      img.data[4 * k] = col[0]; img.data[4 * k + 1] = col[1]; img.data[4 * k + 2] = col[2]; img.data[4 * k + 3] = 255;
+    }
+    var off = document.createElement("canvas"); off.width = R; off.height = R; off.getContext("2d").putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = false; ctx.drawImage(off, 0, 0, W, W);
+  }
+  function refresh() {
+    drawHeat(); drawTgt();
+    readout.textContent = "S = (" + S.a.toFixed(3) + ", " + S.b.toFixed(3) + ")   exact four-face area " + (100 * fourArea(S.a, S.b)).toFixed(2) + "%   pixel count " + (100 * orangeShare).toFixed(2) + "%";
+  }
+  function setS(a, b) { S.a = Math.min(0.995, Math.max(0.005, a)); S.b = Math.min(0.995, Math.max(0.005, b)); sa.value = S.a; sb.value = S.b; refresh(); }
+  function tip(host, x, y, text) {
+    var el = host.querySelector(".tip"); if (!el) { el = document.createElement("div"); el.className = "tip"; host.appendChild(el); }
+    if (text === null) { el.hidden = true; return; }
+    el.hidden = false; el.textContent = text; el.style.left = x + "px"; el.style.top = y + "px";
+  }
+  function pos(cv, e) { var r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, 1 - (e.clientY - r.top) / r.height, e.clientX - r.left, e.clientY - r.top + cv.offsetTop]; }
+  var dragging = false;
+  heat.addEventListener("pointerdown", function (e) { dragging = true; try { heat.setPointerCapture(e.pointerId); } catch (err) {} var p = pos(heat, e); setS(p[0], p[1]); });
+  heat.addEventListener("pointermove", function (e) {
+    var p = pos(heat, e); if (dragging) setS(p[0], p[1]);
+    if (p[0] > 0 && p[0] < 1 && p[1] > 0 && p[1] < 1) tip(document.getElementById("srcmap"), p[2], p[3], "(" + p[0].toFixed(2) + ", " + p[1].toFixed(2) + "): " + (100 * fourArea(p[0], p[1])).toFixed(1) + "% four-face");
+  });
+  heat.addEventListener("pointerup", function () { dragging = false; });
+  heat.addEventListener("pointerleave", function () { tip(document.getElementById("srcmap"), 0, 0, null); });
+  heat.addEventListener("keydown", function (e) {
+    var d = { ArrowLeft: [-0.01, 0], ArrowRight: [0.01, 0], ArrowUp: [0, 0.01], ArrowDown: [0, -0.01] }[e.key];
+    if (d) { e.preventDefault(); setS(S.a + d[0], S.b + d[1]); }
+  });
+  tgt.addEventListener("pointermove", function (e) {
+    var p = pos(tgt, e); if (!(p[0] > 0 && p[0] < 1 && p[1] > 0 && p[1] < 1)) return;
+    var w = winner(sites(S.a, S.b), p[0], p[1]);
+    tip(document.getElementById("tgtmap"), p[2], p[3], "T = (" + p[0].toFixed(2) + ", " + p[1].toFixed(2) + "): " + (w[0] >= 4 ? "four" : "three") + " faces, length " + w[1].toFixed(4));
+  });
+  tgt.addEventListener("pointerleave", function () { tip(document.getElementById("tgtmap"), 0, 0, null); });
+  sa.addEventListener("input", function () { setS(parseFloat(sa.value), S.b); });
+  sb.addEventListener("input", function () { setS(S.a, parseFloat(sb.value)); });
+  if (window.matchMedia) { var mq = window.matchMedia("(prefers-color-scheme: dark)"); if (mq.addEventListener) mq.addEventListener("change", refresh); }
+  new MutationObserver(refresh).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  refresh();
+
+  // Monte Carlo
+  var acc, running = false;
+  function reset() { acc = { n: 0, adj: 0, opp: 0, da: 0, da2: 0, dop: 0, dop2: 0 }; show(); }
+  function sq(x) { return x * x; }
+  function batch(N) {
+    for (var k = 0; k < N; k++) {
+      var a = Math.random(), b = Math.random(), c = Math.random(), d = Math.random();
+      var d0 = sq(1 + d - a) + sq(c - b), d1 = Math.min(sq(2 - c - a) + sq(1 + d - b), sq(1 + c - a) + sq(d + b));
+      if (d1 < d0) acc.adj++;
+      var da = Math.sqrt(Math.min(d0, d1)); acc.da += da; acc.da2 += da * da;
+      var m3 = Math.min(sq(b - d) + sq(3 - a - c), sq(b - d) + sq(1 + a + c), sq(a - c) + sq(3 - b - d), sq(a - c) + sq(1 + b + d));
+      var m4 = Math.min(sq(3 - d - a) + sq(2 - c - b), sq(3 - c - b) + sq(2 - d - a), sq(2 - d + a) + sq(1 + c - b), sq(2 + c - b) + sq(1 - d + a),
+        sq(2 + d - a) + sq(1 - c + b), sq(2 - c + b) + sq(1 + d - a), sq(1 + d + a) + sq(c + b), sq(1 + c + b) + sq(d + a));
+      if (m4 < m3) acc.opp++;
+      var dop = Math.sqrt(Math.min(m3, m4)); acc.dop += dop; acc.dop2 += dop * dop;
+    }
+    acc.n += N;
+  }
+  function row(id, est, se, claim) {
+    document.getElementById(id).textContent = acc.n ? est.toFixed(6) : "–";
+    document.getElementById(id + "e").textContent = acc.n ? se.toFixed(6) : "–";
+    document.getElementById(id + "z").textContent = acc.n ? ((est - claim) / se).toFixed(2) : "–";
+  }
+  function show() {
+    var n = acc.n; document.getElementById("mcn").textContent = n.toLocaleString("en-US") + " samples";
+    var pa = n ? acc.adj / n : 0, po = n ? acc.opp / n : 0, ma = n ? acc.da / n : 0, mo = n ? acc.dop / n : 0;
+    row("mc_a", pa, Math.sqrt(pa * (1 - pa) / (n || 1)), 0.19314718056);
+    row("mc_o", po, Math.sqrt(po * (1 - po) / (n || 1)), 0.15588081552);
+    row("mc_da", ma, Math.sqrt(Math.max(0, acc.da2 / (n || 1) - ma * ma) / (n || 1)), 1.06585307535);
+    row("mc_do", mo, Math.sqrt(Math.max(0, acc.dop2 / (n || 1) - mo * mo) / (n || 1)), 1.59303410287);
+  }
+  function loop() { if (!running) return; batch(250000); show(); setTimeout(loop, 0); }
+  var go = document.getElementById("mcgo");
+  go.addEventListener("click", function () { running = !running; go.textContent = running ? "Pause sampling" : "Resume sampling"; if (running) loop(); });
+  document.getElementById("mcreset").addEventListener("click", function () { reset(); });
+  reset(); batch(500000); show();
+})();
+</script>
