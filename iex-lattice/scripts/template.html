@@ -1,0 +1,186 @@
+<title>IEX Top-of-Hour Discount</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (research note); wide tables/charts break out inside their own scrollers. */
+:root{
+  --bg:#f7f8fa; --surface:#ffffff; --fg:#17202b; --muted:#5b6777; --rule:#d9dee6;
+  --accent:#1f5fa8; --neg:#1f5fa8; --pos:#b4541a; --ok:#1c7a4a; --warn:#a2600a; --bad:#a83232;
+  --tint:#eaf1f9;
+  --display:"Space Grotesk",system-ui,sans-serif; --body:"Inter",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11161d; --surface:#18202a; --fg:#e6ebf2; --muted:#9aa7b8; --rule:#2c3745;
+  --accent:#7db3ee; --neg:#6aa6e8; --pos:#e59a5c; --ok:#6fcf9b; --warn:#e2b25a; --bad:#ef8a8a; --tint:#1b2a3c; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#11161d; --surface:#18202a; --fg:#e6ebf2; --muted:#9aa7b8; --rule:#2c3745;
+  --accent:#7db3ee; --neg:#6aa6e8; --pos:#e59a5c; --ok:#6fcf9b; --warn:#e2b25a; --bad:#ef8a8a; --tint:#1b2a3c; color-scheme:dark }
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 80px}
+main{max-width:46rem;margin:0 auto;display:flex;flex-direction:column;gap:18px;min-width:0}
+h1{font-family:var(--display);font-weight:600;font-size:2rem;line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:1.3rem;margin:26px 0 0;text-wrap:balance;padding-top:18px;border-top:1px solid var(--rule)}
+h3{font-family:var(--display);font-weight:500;font-size:1.05rem;margin:8px 0 0}
+p,ul,ol{margin:0} li{margin:4px 0} ul,ol{padding-left:1.3em}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.1rem}
+.claim{background:var(--tint);border:1px solid var(--rule);border-radius:6px;padding:16px 18px}
+.claim p+p{margin-top:8px}
+code,.num{font-family:var(--mono);font-size:.88em}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--rule);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-weight:600;color:var(--muted);font-size:.8rem}
+td.wrap{white-space:normal;text-align:left}
+.tag{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:3px;border:1px solid currentColor;white-space:nowrap}
+.t-est{color:var(--muted)} .t-ver{color:var(--ok)} .t-ded{color:var(--accent)} .t-spec{color:var(--warn)} .t-rej{color:var(--bad)}
+figure{margin:0;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:14px}
+figcaption{font-size:.85rem;color:var(--muted);margin-top:8px}
+.chart{width:100%;height:auto;min-width:520px;display:block}
+.chart .grid{stroke:var(--rule);stroke-width:1} .chart .zero{stroke:var(--muted);stroke-width:1}
+.chart .tick{fill:var(--muted);font-family:var(--body);font-size:11px}
+.chart rect.neg{fill:var(--neg)} .chart rect.pos{fill:var(--pos)} .chart .err{stroke:var(--fg);stroke-width:1;opacity:.55}
+.chart .bar:hover rect{opacity:.75}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-bottom:6px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+small,.note{font-size:.85rem;color:var(--muted)}
+a{color:var(--accent)}
+</style>
+<main>
+<div class="eyebrow">Research note · Indian power exchange microstructure · 12 Nov 2026</div>
+<h1>The first 15 minutes of every hour clear cheaper in India's real-time power market</h1>
+<p class="lede">On IEX's Real-Time Market, the block starting at :00 clears about ₹0.10/kWh below what its neighbours imply. This holds in every year from 2022 to 2025 and against the :15 block sold in the same auction. I could find no published description of it.</p>
+
+<div class="claim">
+<p><strong>Claim.</strong> For IEX RTM, define the local dip of block <em>j</em> as <span class="num">D<sub>j</sub> = p<sub>j</sub> − (p<sub>j−1</sub> + p<sub>j+1</sub>)/2</span>. Averaged over all hours, <span class="num">D</span> at :00 minus <span class="num">D</span> at :30 is <strong>−0.108 ₹/kWh</strong> (95% CI −0.117 to −0.100, day-bootstrap, Jan 2023 – Sep 2025), about 2–3% of the average price. The Day-Ahead Market shows the same sign at 40% of the size, and it has nearly disappeared there in 2025.</p>
+<p><strong>Falsified if</strong> the same statistic on an independent RTM sample (Oct 2025 onward, or PXIL/HPX) is not negative with a magnitude of at least 0.03 ₹/kWh.</p>
+</div>
+
+<h2>Research question</h2>
+<p>India's exchanges trade 96 fifteen-minute blocks per day and have no hourly product. Do prices nevertheless carry an hour-periodic structure, and if so, is it the European "sawtooth" under another name or something different?</p>
+
+<h2>What is already known</h2>
+<div class="scroll"><table>
+<tr><th>Finding</th><th>Status</th></tr>
+<tr><td class="wrap">In Germany, 15-minute intraday prices zig-zag around the hourly day-ahead price: hourly contracts fix a flat position while solar and load ramp inside the hour. The sign flips with the ramp direction (Kiesel &amp; Paraschiv; Kremer et al.; Märkle-Huß et al.).</td><td><span class="tag t-est">Established</span></td></tr>
+<tr><td class="wrap">European grid frequency deviates deterministically at the start of each hour, because scheduled generation steps while load ramps (Kruse, Schäfer, Witthaut 2021).</td><td><span class="tag t-est">Established</span></td></tr>
+<tr><td class="wrap">Indian grid frequency also misbehaves at hour boundaries. CERC's 2018 expert-group report on reference frequency has a section titled "Hourly boundary frequency phenomenon"; CERC's 2024 primary-response committee report again discusses hour-boundary and 15-minute-boundary spikes.</td><td><span class="tag t-est">Established</span> <small>titles and snippets only; I could not open the PDFs from this sandbox</small></td></tr>
+<tr><td class="wrap">IEX RTM runs 48 half-hourly auctions, each clearing two 15-minute blocks (:00 with :15, :30 with :45).</td><td><span class="tag t-est">Established</span> <small>confirmed by the Session ID column in the data</small></td></tr>
+<tr><td class="wrap">An hour-periodic price pattern on Indian exchanges.</td><td><span class="tag t-spec">Not found</span> <small>four targeted searches; Indian studies treat time of day, season and volatility, not position within the hour</small></td></tr>
+</table></div>
+
+<h2>Data</h2>
+<p>Two public GitHub datasets of IEX market snapshots, collected by different people. I had no access to your own data or to IEX directly (the sandbox blocks most hosts).</p>
+<ul>
+<li><strong>A</strong>: DAM, GDAM and RTM, Jan 2023 – Sep 2025, 1,005 days, price, cleared volume, buy and sell bid volume per block.</li>
+<li><strong>B</strong>: RTM only, Apr 2022 – Jun 2025, 1,181 days, with session IDs.</li>
+</ul>
+<p>On the 912 overlapping days, RTM prices differ by more than ₹0.001 in 0.1% of blocks. So the two are effectively one source (IEX) transcribed twice; B adds nine earlier months.</p>
+
+<h2>Path to the hypothesis</h2>
+<h3>Step 1. Prices do move on an hourly and half-hourly lattice <span class="tag t-ver">Measured</span></h3>
+<p>Mean absolute price change between consecutive blocks, by the clock position of the later block (₹/kWh):</p>
+<div class="scroll"><table>
+<tr><th>Market</th><th>into :00</th><th>into :15</th><th>into :30</th><th>into :45</th></tr>
+<tr><td>RTM</td><td>0.48</td><td>0.26</td><td>0.42</td><td>0.25</td></tr>
+<tr><td>DAM</td><td>0.34</td><td>0.19</td><td>0.22</td><td>0.20</td></tr>
+<tr><td>GDAM</td><td>0.36</td><td>0.16</td><td>0.21</td><td>0.16</td></tr>
+</table></div>
+<p>RTM's half-hour steps are expected: each auction has newer information than the last. The hour-boundary excess in DAM is not, since all 96 blocks clear at once. DAM buy and sell bid volumes show the same thing (hour-boundary changes 1.7–2× the within-hour ones), so part of the bid stack is submitted in hour-flat shapes.</p>
+
+<h3>Step 2. The German sawtooth hypothesis fails <span class="tag t-rej">Rejected</span></h3>
+<p>If hour-flat day-ahead positions left a ramp-shaped residual for RTM, the within-hour pattern should reverse between rising and falling hours. It does not. Detrended RTM price at :00 is −0.075 in rising-price hours and −0.091 in falling-price hours. A regression of the :00 residual on the local price trend, the RTM bid trend, the DAM volume step at the boundary and the DAM :00 residual leaves the intercept at −0.073 (se 0.003) with R² of 3%.</p>
+
+<h3>Step 3. What remains is an unconditional dip at :00 <span class="tag t-ver">Measured</span></h3>
+<p>A one-block dip of depth δ should give second differences of (−δ, +δ/2, 0, +δ/2) at (:00, :15, :30, :45). Observed for RTM:</p>
+<div class="scroll"><table>
+<tr><th>Mean D<sub>j</sub>, ₹/kWh</th><th>:00</th><th>:15</th><th>:30</th><th>:45</th></tr>
+<tr><td>RTM observed</td><td>−0.102</td><td>+0.048</td><td>+0.006</td><td>+0.049</td></tr>
+<tr><td>Pure dip, δ = 0.10</td><td>−0.100</td><td>+0.050</td><td>0</td><td>+0.050</td></tr>
+<tr><td>DAM observed</td><td>−0.036</td><td>+0.009</td><td>+0.005</td><td>+0.022</td></tr>
+<tr><td>GDAM observed</td><td>−0.012</td><td>+0.001</td><td>0.000</td><td>+0.011</td></tr>
+</table></div>
+<p>The match to a single-block dip is close. It is a dip in one block, not a ramp across the hour.</p>
+
+<h2>Evidence</h2>
+<figure>
+<div class="legend"><span><span class="sw" style="background:var(--neg)"></span>:00 block cheaper than neighbours imply</span><span><span class="sw" style="background:var(--pos)"></span>dearer</span><span>whiskers: 95% interval</span></div>
+<div class="scroll">{{CHART_HOUR}}</div>
+<figcaption>RTM top-of-hour effect by hour of day, ₹/kWh: D at h:00 minus the average D at the two nearest :30 blocks. Jan 2023 – Sep 2025. Hover a bar for the value.</figcaption>
+</figure>
+
+<div class="scroll"><table>
+<tr><th>Test</th><th>Result</th></tr>
+<tr><td class="wrap">Same auction: p(:15) − p(:00)</td><td>+0.099 [0.093, 0.105]</td></tr>
+<tr><td class="wrap">Placebo, same auction: p(:45) − p(:30)</td><td>−0.009 [−0.014, −0.003]</td></tr>
+<tr><td class="wrap">Hours where :00 is cheaper / dearer than :15</td><td>53% / 34%</td></tr>
+<tr><td class="wrap">Days with a negative daily-mean effect</td><td>78% (84% with moving-average detrending)</td></tr>
+<tr><td class="wrap">By year (dataset A, second-difference)</td><td>2023 −0.136 · 2024 −0.106 · 2025 −0.074</td></tr>
+<tr><td class="wrap">By year (dataset B, moving-average residual)</td><td>2022 −0.094 · 2023 −0.092 · 2024 −0.077 · 2025 −0.069</td></tr>
+<tr><td class="wrap">Every calendar month and every weekday</td><td>negative, −0.05 to −0.11</td></tr>
+<tr><td class="wrap">Excluding hours touching the price cap or below ₹0.5</td><td>−0.101 (82% of hours kept)</td></tr>
+<tr><td class="wrap">Winsorised at 1% / 99%</td><td>−0.078</td></tr>
+<tr><td class="wrap">Hour-of-day profile, correlation between years</td><td>0.82 – 0.85</td></tr>
+<tr><td class="wrap">RTM bid volume at :00 versus trend</td><td>buy −1.3%, sell +1.0%</td></tr>
+<tr><td class="wrap">Same, at 18:00 / 13:00 / 06:00</td><td>buy −6.7% / −5.6% / −4.5%; sell +3.3% / +3.0% / +2.8%</td></tr>
+<tr><td class="wrap">DAM − RTM spread at :00, detrended</td><td>+0.049 [0.043, 0.054]</td></tr>
+</table></div>
+
+<p>The same-auction comparison matters most. Blocks :00 and :15 are bid at the same moment with the same information, so the gap cannot come from news arriving between auctions. The :30/:45 pair, which shares that structure, shows nothing.</p>
+
+<h3>Evidence against, and limits</h3>
+<ul>
+<li>The median block-level gap between :00 and :15 is zero to four decimals. The mean comes from a minority of hours with large gaps, concentrated at 05:00–07:00, 10:00, 13:00 and 16:00–18:00.</li>
+<li>Two hours go the other way: 19:00 (+0.14) and 09:00 (+0.06). 19:00 is positive in DAM and GDAM as well. A single "load dips at the hour" story does not cover this.</li>
+<li>The effect is shrinking by roughly a fifth to a quarter per year in RTM and is close to gone in DAM. It may not survive.</li>
+<li>Both datasets come from IEX's website. An error on IEX's side, or a mislabelled block convention, would affect both. Dataset B labels blocks as ranges ("00:00-00:15"), which fixes the convention.</li>
+<li>All prices are national unconstrained clearing prices. Area prices under congestion were not available.</li>
+</ul>
+
+<h2>Mechanism</h2>
+<p><span class="tag t-ded">Deduction</span> The bid volumes say what happens: at :00 buyers ask for less and sellers offer more, most strongly at 06:00, 13:00 and 18:00. They do not say why.</p>
+<p><span class="tag t-spec">Hypothesis</span> Scheduled supply and switchable load change at the top of the hour while the rest of demand moves smoothly. Candidates are hour-blocked bilateral and term-ahead contracts, hydro peaking schedules, industrial shift and lunch breaks (13:00), and feeder changeovers in which one group is switched off on the hour and the next picks up over several minutes. Each leaves utilities briefly long in the first block. The same imbalance would produce the hour-boundary frequency excursions that CERC has documented. I have not verified this link.</p>
+<p>The standard European mechanism (stepped schedules against a smooth ramp) predicts a sign that follows the ramp. That was tested in step 2 and rejected, so if the Indian frequency phenomenon and this price dip share a cause, it is closer to a recurring one-sided surplus than to a symmetric ramp mismatch.</p>
+
+<h2>Simplest tests</h2>
+<ol>
+<li><strong>Replication, ten minutes.</strong> Run <code>scripts/secdiff.py</code> on your own IEX RTM history, especially Oct 2025 onward. Prediction: negative, between −0.03 and −0.09 ₹/kWh, with the hour-of-day profile correlating above 0.6 with the chart here.</li>
+<li><strong>Mechanism, one afternoon.</strong> Take Grid-India frequency data at one-minute or finer resolution. For each hour compute mean frequency in minutes 0–15 minus the mean of minutes −15–0 and 15–30. Prediction: positive on average, and across the 24 hours negatively correlated with the bars in the chart, with 19:00 reversed or flat. A null result kills the shared-cause hypothesis but not the price finding.</li>
+<li><strong>Other venues.</strong> PXIL and HPX real-time prices should show the same sign if the cause is physical and not specific to IEX's bidders.</li>
+<li><strong>Bid curves.</strong> IEX publishes aggregate demand and supply curves per block. Comparing :00 with :15 in the same session shows whether the shift is in price-insensitive volume (schedules) or in priced bids.</li>
+</ol>
+
+<h2>What this is worth in practice</h2>
+<ul>
+<li>A buyer with 15 minutes of flexibility pays about ₹0.10/kWh less at :00 than at :15, with no forecasting. Equal-weighted, the :00 blocks average ₹4.52 against ₹4.59 for all blocks.</li>
+<li>A seller, including a discharging battery, should prefer any block other than :00.</li>
+<li>It is not a standalone battery trade. A 10% round-trip loss at ₹4.6 costs about ₹0.46, more than four times the gap. It is a tie-breaker for which block to charge in.</li>
+<li>Price forecasts for RTM should carry a quarter-of-hour term that varies by hour. Models with only hour-of-day features will be biased by up to ₹0.4 at 18:00.</li>
+<li>These figures ignore the price impact of acting on them. If it is a thin surplus, it will not absorb much volume.</li>
+</ul>
+
+<h2>What might be new, and what is unverified</h2>
+<div class="scroll"><table>
+<tr><th>Statement</th><th>Status</th></tr>
+<tr><td class="wrap">RTM price at :00 is ~₹0.10 below the local trend, 2022–2025, robust to detrending method, outliers, year, month, weekday.</td><td><span class="tag t-ver">Verified here</span></td></tr>
+<tr><td class="wrap">It is a one-block dip, not a ramp-following sawtooth.</td><td><span class="tag t-ver">Verified here</span></td></tr>
+<tr><td class="wrap">DAM bids are partly hour-shaped; DAM carries a smaller dip that faded in 2025.</td><td><span class="tag t-ver">Verified here</span></td></tr>
+<tr><td class="wrap">Nobody has reported this for Indian exchanges.</td><td><span class="tag t-spec">Unverified</span> <small>absence in a limited search; traders at discoms may know it informally</small></td></tr>
+<tr><td class="wrap">It shares a cause with hour-boundary frequency excursions.</td><td><span class="tag t-spec">Hypothesis</span></td></tr>
+<tr><td class="wrap">Which physical or contractual step drives each hour, and why 19:00 is reversed.</td><td><span class="tag t-spec">Unknown</span></td></tr>
+<tr><td class="wrap">It persists after Sep 2025 and is exploitable net of price impact.</td><td><span class="tag t-spec">Untested</span></td></tr>
+</table></div>
+
+<h2>Sources</h2>
+<ul class="note">
+<li>Data A: github.com/divyeshBhartiya/IEXInsiderMCP (<code>IEX_Market_Data.csv</code>). Data B: github.com/nandanrajesh/Indian-Real-Time-Market-Analysis.</li>
+<li><a href="https://cercind.gov.in/2018/Reports/50%20Hz_Committee1.pdf">CERC expert group report on reference frequency, 2018</a>, section 3.6 (title seen in search results only).</li>
+<li><a href="https://www.cercind.gov.in/2024/reports/DSM-Expert-Committee-Report-Final-with-Appendix.pdf">CERC expert committee on inadequate primary response, 2024</a> (snippets only).</li>
+<li><a href="https://ux-tauri.unisg.ch/RePEc/usg/sfwpfi/WPF-1521.pdf">Kiesel &amp; Paraschiv, Econometric analysis of 15-minute intraday electricity prices</a>.</li>
+<li><a href="https://www.researchgate.net/publication/321369723_Contract_durations_in_the_electricity_market_Causal_impact_of_15_min_trading_on_the_EPEX_SPOT_market">Märkle-Huß, Feuerriegel, Neumann, Contract durations in the electricity market</a>.</li>
+<li><a href="https://arxiv.org/pdf/2106.09538">Kruse, Schäfer, Witthaut, Exploring deterministic frequency deviations with explainable AI</a>.</li>
+<li><a href="https://www.researchgate.net/publication/366390811_Impact_of_Sub-Hourly_Bidding_in_Power_Exchanges_in_India">Impact of Sub-Hourly Bidding in Power Exchanges in India</a> and the <a href="https://forumofregulators.gov.in/Data/Reports/5.pdf">Forum of Regulators five-minute scheduling report</a> (closest Indian prior work; neither reports a within-hour price pattern in the excerpts available).</li>
+<li>Scripts: <code>iex-lattice/scripts/</code> in the repository (<code>explore.py</code>, <code>sawtooth.py</code>, <code>toh.py</code>, <code>mech.py</code>, <code>secdiff.py</code>).</li>
+</ul>
+</main>
